@@ -10,6 +10,11 @@ import (
 func SetUpRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
 
+	router.GET("/", func(c *gin.Context) {
+		c.String(200, "Welcome To Medical Vital Management System")
+	})
+
+	// User routes
 	userGroup := router.Group("/users")
 	{
 		userGroup.GET("/get_user", handlers.GetUserHandler(db))
@@ -25,8 +30,15 @@ func SetUpRouter(db *gorm.DB) *gin.Engine {
 		vitalGroup.GET("/get_vitals", handlers.GetVitalsHandler(db))
 		vitalGroup.PUT("/edit_vital", handlers.UpdateVitalHandler(db))
 		vitalGroup.DELETE("/delete_vital", handlers.DeleteVitalHandler(db))
-		vitalGroup.POST("/aggregate", handlers.AggregateVitalsHandler(db))
-		// vitalGroup.POST("/population_insight", handlers.PopulationInsightHandler(db))
+
 	}
+
+	//Insight routes
+	insightGroup := router.Group("/insights")
+	{
+		insightGroup.POST("/aggregate", handlers.AggregateVitalsHandler(db))
+		insightGroup.POST("/population_insight", handlers.PopulationInsightHandler(db))
+	}
+
 	return router
 }
