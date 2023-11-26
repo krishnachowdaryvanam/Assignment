@@ -54,11 +54,23 @@ func UpdateVital(db *gorm.DB, username, vitalID, timestamp string, newValue floa
 }
 
 // DeleteVital deletes a vital record for a user using the vital ID and timestamp
-func DeleteVital(db *gorm.DB, username, vitalID, timestamp string) error {
-	err := db.Where("username = ? AND vital_id = ? AND timestamp = ?", username, vitalID, timestamp).
-		Delete(&models.Vital{}).Error
+func DeleteVital(db *gorm.DB, request models.DeleteVitalRequest) error {
+	fmt.Printf("Deleting vital: %+v\n", request)
+
+	var vital models.Vital
+	err := db.Where("username = ? AND vital_id = ? AND timestamp = ?", request.Username, request.VitalID, request.Timestamp).
+		First(&vital).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("failed to check vital existence: %v", err)
+	}
+
+	err = db.Delete(&vital).Error
 	if err != nil {
 		return fmt.Errorf("failed to delete vital: %v", err)
 	}
+
 	return nil
 }

@@ -103,61 +103,41 @@ func GetVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		username := c.Param("username")
 		var updateData struct {
+			Username  string  `json:"username"`
 			VitalID   string  `json:"vitalID"`
 			Timestamp string  `json:"timestamp"`
 			NewValue  float64 `json:"newValue"`
 		}
+
 		if err := c.ShouldBindJSON(&updateData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": fmt.Sprintf("Invalid request: %v", err)})
 			return
 		}
 
-		exists, err := app.UserExists(db, username)
+		err := app.UpdateVital(db, updateData.Username, updateData.VitalID, updateData.Timestamp, updateData.NewValue)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
-			return
-		} else if !exists {
-			c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "User not found"})
-			return
-		}
-
-		if err := app.UpdateVital(db, username, updateData.VitalID, updateData.Timestamp, updateData.NewValue); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to edit vital: %v", err)})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Vital updated for %s.", username)})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Vital value updated for %s.", updateData.Username)})
 	}
 }
 
 func DeleteVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		username := c.Param("username")
-		var deleteData struct {
-			VitalID   string `json:"vitalID"`
-			Timestamp string `json:"timestamp"`
-		}
-		if err := c.ShouldBindJSON(&deleteData); err != nil {
+		var deleteRequest models.DeleteVitalRequest
+		if err := c.ShouldBindJSON(&deleteRequest); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": fmt.Sprintf("Invalid request: %v", err)})
 			return
 		}
 
-		exists, err := app.UserExists(db, username)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
-			return
-		} else if !exists {
-			c.JSON(http.StatusNotFound, gin.H{"status": "error", "message": "User not found"})
-			return
-		}
-
-		if err := app.DeleteVital(db, username, deleteData.VitalID, deleteData.Timestamp); err != nil {
+		if err := app.DeleteVital(db, deleteRequest); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to delete vital: %v", err)})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Vital deleted for %s.", username)})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Vital deleted for %s.", deleteRequest.Username)})
 	}
 }

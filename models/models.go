@@ -23,6 +23,11 @@ type Vital struct {
 	Timestamp time.Time `gorm:"column:timestamp"`
 }
 
+type DeleteVitalRequest struct {
+	Username  string `json:"username" binding:"required"`
+	VitalID   string `json:"vital_id" binding:"required"`
+	Timestamp string `json:"timestamp" binding:"required"`
+}
 type AggregateRequest struct {
 	Username       string    `json:"username"`
 	VitalIDs       []string  `json:"vital_ids"`
