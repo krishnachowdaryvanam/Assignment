@@ -76,7 +76,6 @@ func TestUpdateUserWithMock(t *testing.T) {
 func TestDeleteUserWithMock(t *testing.T) {
 	mockDB := new(MockDB)
 
-	// Setup expectations
 	mockDB.On("DeleteUser", "JohnDoe").Return(nil)
 
 	err := mockDB.DeleteUser("JohnDoe")

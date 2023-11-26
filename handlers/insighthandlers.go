@@ -10,7 +10,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// AggregateVitalsHandler retrieves average values of specific vitals for a user over a specified period
 func AggregateVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var aggregateRequest models.AggregateRequest
@@ -19,7 +18,6 @@ func AggregateVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user exists
 		userExists, err := app.UserExists(db, aggregateRequest.Username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -31,14 +29,12 @@ func AggregateVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Perform calculations in the code instead of fetching from the database
 		aggregatedValues, err := app.AggregateVitals(db, aggregateRequest)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to calculate aggregate values: %v", err)})
 			return
 		}
 
-		// Prepare the response
 		response := models.AggregateResponse{
 			Status:  "success",
 			Message: "Aggregate fetched successfully",
@@ -50,12 +46,10 @@ func AggregateVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 			EndTimestamp:   aggregateRequest.EndTimestamp,
 		}
 
-		// Return the response
 		c.JSON(http.StatusOK, response)
 	}
 }
 
-// PopulationInsightHandler compares a user's vitals against the population and provides percentile standings
 func PopulationInsightHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var insightRequest models.PopulationInsightRequest
@@ -64,7 +58,6 @@ func PopulationInsightHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user exists
 		userExists, err := app.UserExists(db, insightRequest.Username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -76,14 +69,12 @@ func PopulationInsightHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Calculate population insight
 		insight, err := app.GetPopulationInsight(db, insightRequest.Username, insightRequest.VitalID, insightRequest.StartTimestamp, insightRequest.EndTimestamp)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to calculate population insight: %v", err)})
 			return
 		}
 
-		// Prepare the response
 		response := models.PopulationInsightResponse{
 			Status:  "success",
 			Message: "Population insight fetched successfully",
@@ -96,7 +87,6 @@ func PopulationInsightHandler(db *gorm.DB) gin.HandlerFunc {
 			},
 		}
 
-		// Return the response
 		c.JSON(http.StatusOK, response)
 	}
 }

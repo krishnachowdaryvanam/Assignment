@@ -60,7 +60,6 @@ func GetUserHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// UpdateUserHandler updates an existing user record
 func UpdateUserHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var updatedUser models.User
@@ -69,7 +68,6 @@ func UpdateUserHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user with the provided username exists
 		exists, err := app.UserExists(db, updatedUser.Username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -79,7 +77,6 @@ func UpdateUserHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Update the user
 		if err := app.UpdateUser(db, updatedUser); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to update user: %v", err)})
 			return
@@ -89,12 +86,10 @@ func UpdateUserHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// DeleteUserHandler deletes a user record
 func DeleteUserHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.Param("username")
 
-		// Check if the user with the provided username exists
 		exists, err := app.UserExists(db, username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -104,7 +99,6 @@ func DeleteUserHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Delete the user
 		if err := app.DeleteUser(db, username); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to delete user: %v", err)})
 			return

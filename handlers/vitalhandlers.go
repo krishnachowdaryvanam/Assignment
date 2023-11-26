@@ -11,7 +11,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// CreateVitalHandler handles the insertion of a new vital record into the database
 func CreateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request struct {
@@ -26,7 +25,6 @@ func CreateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user exists before inserting the vital
 		exists, err := app.UserExists(db, request.Username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -36,14 +34,12 @@ func CreateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Parse the timestamp from the request
 		timestamp, err := time.Parse(time.RFC3339, request.Timestamp)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid timestamp format"})
 			return
 		}
 
-		// Insert the new vital
 		if err := app.CreateVital(db, models.Vital{
 			Username:  request.Username,
 			VitalID:   request.VitalID,
@@ -58,10 +54,8 @@ func CreateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// GetVitalsHandler retrieves vital records for a user over a specified period
 func GetVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Bind the JSON request body to the GetData struct
 		var getData struct {
 			Username string   `json:"username"`
 			Period   []string `json:"period"`
@@ -71,7 +65,6 @@ func GetVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Extract values from the GetData struct
 		username := getData.Username
 		period := getData.Period
 
@@ -80,7 +73,6 @@ func GetVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user exists before getting vitals
 		exists, err := app.UserExists(db, username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -90,14 +82,12 @@ func GetVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Get vitals for the user over the specified period
 		vitals, err := app.GetVitals(db, username, period)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to get vitals: %v", err)})
 			return
 		}
 
-		// Transform the result to the desired format
 		var transformedVitals []map[string]interface{}
 		for _, vital := range vitals {
 			transformedVitals = append(transformedVitals, map[string]interface{}{
@@ -111,7 +101,6 @@ func GetVitalsHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// UpdateVitalHandler updates an existing vital record in the database
 func UpdateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.Param("username")
@@ -125,7 +114,6 @@ func UpdateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user exists before updating the vital
 		exists, err := app.UserExists(db, username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -135,7 +123,6 @@ func UpdateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Update the vital
 		if err := app.UpdateVital(db, username, updateData.VitalID, updateData.Timestamp, updateData.NewValue); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to edit vital: %v", err)})
 			return
@@ -145,7 +132,6 @@ func UpdateVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-// DeleteVitalHandler deletes a vital record for a user using the vital ID and timestamp
 func DeleteVitalHandler(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.Param("username")
@@ -158,7 +144,6 @@ func DeleteVitalHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Check if the user exists before deleting the vital
 		exists, err := app.UserExists(db, username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to check user existence: %v", err)})
@@ -168,7 +153,6 @@ func DeleteVitalHandler(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Delete the vital
 		if err := app.DeleteVital(db, username, deleteData.VitalID, deleteData.Timestamp); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": fmt.Sprintf("Failed to delete vital: %v", err)})
 			return
